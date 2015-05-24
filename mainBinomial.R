@@ -31,6 +31,9 @@ system.time({
 })
 
 
+# Probability
+pbinom(3,size = 5,p=0.5,lower.tail = F)
+
 
 x <- rbinom(n = numTrials, size = 5,prob = 0.5)
 mean(x>=4)
@@ -39,6 +42,14 @@ system.time({
   mean(x>=4)
 })
 
+
+# Compute ergodic mean
+cumSumX <- cumsum(x)
+ergodicMean <- cumSumX/1:length(cumSumX)
+#n*p
+5*0.5
+plot(ergodicMean[1:1000],type="l")
+plot(ergodicMean[1:10000],type="l")
 
 
 #Convert to function
