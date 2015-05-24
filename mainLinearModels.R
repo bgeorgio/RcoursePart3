@@ -3,7 +3,7 @@ library(car)
 data(Salaries)
 lm1 <- lm(salary~rank,data = Salaries)
 sumlm1 <- summary(lm1)
-
+sumlm1
 
 
 
@@ -75,15 +75,43 @@ registerDoParallel(cl)
 t1<-system.time(coefList <- foreach(curSampleId=1:numSamples) %do% { lmfun2() })
 t2<-system.time(coefList <- foreach(curSampleId=1:numSamples) %dopar% { lmfun2() })
 cat("NumSamples:",numSamples,"  SampleSize:",sampleSize," time(1-core):",t1[3]," time(2-core):",t2[3],"\n")
-
+stopCluster(cl)
 
 #
 numSamples <- 50
 sampleSize <- 500000
 t1<-system.time(coefList <- foreach(curSampleId=1:numSamples) %do% { lmfun2() })
+numCores <- 2
+cl <- makeCluster(numCores)
+registerDoParallel(cl)
 t2<-system.time(coefList <- foreach(curSampleId=1:numSamples) %dopar% { lmfun2() })
-cat("NumSamples:",numSamples,"  SampleSize:",sampleSize," time(1-core):",t1[3]," time(2-core):",t2[3],"\n")
+stopCluster(cl)
+
+numCores <- 3
+cl <- makeCluster(numCores)
+registerDoParallel(cl)
+t3<-system.time(coefList <- foreach(curSampleId=1:numSamples) %dopar% { lmfun2() })
+stopCluster(cl)
+
+cat("NumSamples:",numSamples,"  SampleSize:",sampleSize," time(1-core):",t1[3],
+    " time(2-core):",t2[3]," time(3-core):",t3[3],"\n")
 
 
 
+lmfun3 <- function(curID){
+  selectedRows <- sample(1:nrow(Salaries),size = sampleSize,replace = T)
+  curSample <- Salaries[selectedRows,]
+  curLM <- lm(salary~yrs.service,data = curSample)
+  summaryCurLM <- summary(curLM)
+  png(filename = paste0("LMimages/SalariesPlot_",curID,".png"))
+  plot(curSample$yrs.service,curSample$salary,xlab = "Years in service",ylab = "Salary")
+  title(paste0("Linear Model ",curID))
+  abline(curLM)
+  dev.off() 
+  #cat("Created plot",curID)
+  cat("\rCreated plot",curID)
+  return(summaryCurLM$coefficients[2]  )
+}
 
+dir.create("LMimages")
+k1 <- sapply(1:50,lmfun3)
