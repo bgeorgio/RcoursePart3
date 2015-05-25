@@ -1,6 +1,6 @@
 # Geometric distribution
 sampleSize <- 100
-prob <- 0.1
+prob <- 0.2
 # success: if randomNumber < prob
 
 randSample <- c()
